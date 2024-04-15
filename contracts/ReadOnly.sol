@@ -62,9 +62,9 @@ contract ReadOnlyPool is ReentrancyGuard, ERC20("LPToken", "LPT") {
     // @notice burn LPTokens and get back the original deposit of ETH + profits
     function removeLiquidity() external nonReentrant {
         uint256 numLPTokens = balanceOf(msg.sender);
-        uint256 totalLPTokens = totalSupply();
+        uint256 totalLPTokens = totalSupply();// 101
         uint256 ethToReturn = (originalStake[msg.sender] * (numLPTokens + totalLPTokens)) / totalLPTokens;
-
+                                // (1*(1+101))/101 = 102/101
         originalStake[msg.sender] = 0;
         (bool ok, ) = msg.sender.call{value: ethToReturn}("");
         require(ok, "eth transfer failed");
@@ -81,6 +81,7 @@ contract ReadOnlyPool is ReentrancyGuard, ERC20("LPToken", "LPT") {
 
     function getVirtualPrice() external view returns (uint256 virtualPrice) {
         virtualPrice = address(this).balance / totalSupply();
+        // (101-1.xxx)/100 = 0 
     }
 
     // @notice earn profits for the pool

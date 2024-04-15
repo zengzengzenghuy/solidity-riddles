@@ -56,8 +56,8 @@ contract Depositoor is IERC721Receiver {
     }
 
     function onERC721Received(
-        address,
         address from,
+        address to,
         uint256 tokenId,
         bytes calldata
     ) external override returns (bytes4) {
@@ -71,27 +71,20 @@ contract Depositoor is IERC721Receiver {
     }
 
     function claimEarnings(uint256 _tokenId) public {
-        require(
-            stakes[msg.sender].tokenId == _tokenId && _tokenId != 0,
-            "not your NFT"
-        );
+        require(stakes[msg.sender].tokenId == _tokenId && _tokenId != 0, "not your NFT");
         payout(msg.sender);
         stakes[msg.sender].depositTime = block.timestamp;
     }
 
     function withdrawAndClaimEarnings(uint256 _tokenId) public {
-        require(
-            stakes[msg.sender].tokenId == _tokenId && _tokenId != 0,
-            "not your NFT"
-        );
+        require(stakes[msg.sender].tokenId == _tokenId && _tokenId != 0, "not your NFT");
         payout(msg.sender);
         nft.safeTransferFrom(address(this), msg.sender, _tokenId);
         delete stakes[msg.sender];
     }
 
     function payout(address _a) private {
-        uint256 amountToSend = (block.timestamp - stakes[_a].depositTime) *
-            REWARD_RATE;
+        uint256 amountToSend = (block.timestamp - stakes[_a].depositTime) * REWARD_RATE;
 
         if (amountToSend > 50e18) {
             amountToSend = 50e18;

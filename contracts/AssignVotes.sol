@@ -19,17 +19,8 @@ contract AssignVotes {
 
     constructor() payable {}
 
-    function createProposal(
-        address target,
-        bytes calldata data,
-        uint256 value
-    ) external {
-        proposals[proposalCounter] = Proposal({
-            target: target,
-            data: data,
-            value: value,
-            votes: 0
-        });
+    function createProposal(address target, bytes calldata data, uint256 value) external {
+        proposals[proposalCounter] = Proposal({target: target, data: data, value: value, votes: 0});
 
         unchecked {
             ++proposalCounter;

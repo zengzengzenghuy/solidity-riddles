@@ -5,7 +5,7 @@ pragma solidity 0.8.15;
  * Your goal is to steal all the ether in the contract.
  *
  */
- 
+
 contract DeleteUser {
     struct User {
         address addr;

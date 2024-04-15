@@ -79,6 +79,7 @@ contract Governance {
         require(viceroys[msg.sender].appointedBy != 0, "not a viceroy");
         require(viceroys[msg.sender].approvedVoter[voter], "cannot disapprove an unapproved address");
         viceroys[msg.sender].numAppointments += 1;
+        // delete a mapping will not have effect, unless you specify the key of the mapping
         delete viceroys[msg.sender].approvedVoter[voter];
     }
 

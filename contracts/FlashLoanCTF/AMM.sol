@@ -28,20 +28,12 @@ contract AMM {
         require(msg.value == 20 ether, "Send 20 ether for initial Eth reserve");
         ethReserve = 20 ether;
         lendTokenReserve = 400e18;
-        SafeERC20.safeTransferFrom(
-            lendToken,
-            msg.sender,
-            address(this),
-            400e18
-        );
+        SafeERC20.safeTransferFrom(lendToken, msg.sender, address(this), 400e18);
     }
 
-    function swapLendTokenForEth(
-        address to
-    ) external returns (uint ethAmountOut) {
+    function swapLendTokenForEth(address to) external returns (uint ethAmountOut) {
         // TAKE advantage of "donations" and avoid locked tokens
-        uint256 lendTokenAmountIn = lendToken.balanceOf(address(this)) -
-            lendTokenReserve;
+        uint256 lendTokenAmountIn = lendToken.balanceOf(address(this)) - lendTokenReserve;
         require(lendTokenAmountIn > 0, "Amount in cannot be zero");
 
         ethAmountOut = getLendTokenToEthPrice(lendTokenAmountIn);
@@ -53,9 +45,7 @@ contract AMM {
         require(success);
     }
 
-    function swapEthForLendToken(
-        address to
-    ) external payable returns (uint lendTokenAmountOut) {
+    function swapEthForLendToken(address to) external payable returns (uint lendTokenAmountOut) {
         // TAKE advantage of "donations" and avoid locked tokens
         uint256 ethAmountIn = address(this).balance - ethReserve;
         require(ethAmountIn > 0, "Amount should be greater than zero");
@@ -68,20 +58,12 @@ contract AMM {
         lendToken.transfer(to, lendTokenAmountOut);
     }
 
-    function getLendTokenToEthPrice(
-        uint _lendTokenAmountIn
-    ) public view returns (uint _ethAmountOut) {
-        _ethAmountOut =
-            (ethReserve * _lendTokenAmountIn) /
-            (lendTokenReserve + _lendTokenAmountIn);
+    function getLendTokenToEthPrice(uint _lendTokenAmountIn) public view returns (uint _ethAmountOut) {
+        _ethAmountOut = (ethReserve * _lendTokenAmountIn) / (lendTokenReserve + _lendTokenAmountIn);
     }
 
-    function getEthToLendTokenPrice(
-        uint _ethAmountIn
-    ) public view returns (uint lendTokenAmountOut) {
-        lendTokenAmountOut =
-            (lendTokenReserve * _ethAmountIn) /
-            (ethReserve + _ethAmountIn);
+    function getEthToLendTokenPrice(uint _ethAmountIn) public view returns (uint lendTokenAmountOut) {
+        lendTokenAmountOut = (lendTokenReserve * _ethAmountIn) / (ethReserve + _ethAmountIn);
     }
 
     receive() external payable {}

